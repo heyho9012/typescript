@@ -1,5 +1,5 @@
 // type aliases
-
+// 타입 별칭은 확장이 불가능 (가능한 한 인터페이스 사용)
 type Person = {
   name: string;
   age: number;
