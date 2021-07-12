@@ -11,3 +11,20 @@ sum(10, 20);
 // tsc => typescript compiler
 
 // tsc index.ts
+
+class Student {
+  name: string; // type 정의
+
+  constructor (name: string) {
+    this.name = name;
+  }
+}
+// =>
+// JavaScraipt로 변환 (TypeScript Playground)
+// "use strict";
+// var Student = (function() {
+//   function Student(name) {
+//     this.name = name;
+//   }
+//   return Student;
+// })

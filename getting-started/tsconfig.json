@@ -2,6 +2,6 @@
   "compilerOptions": {
     "allowJs": true,
     "checkJs": true, // @ts-check
-    "noImplicitAny": true,
+    "noImplicitAny": true, // type을 최소한 any라도 적어야 한다.
   }
 }
