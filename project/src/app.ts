@@ -12,8 +12,9 @@ import {
 } from './covid/index';
 
 // utils
-function $(selector: string) {
-  return document.querySelector(selector);
+function $<T extends HTMLElement = HTMLDivElement>(selector: string) {
+  const element = document.querySelector(selector);
+  return element as T;
 }
 function getUnixTimestamp(date: Date | string): number {
   return new Date(date).getTime();
@@ -21,13 +22,13 @@ function getUnixTimestamp(date: Date | string): number {
 
 // DOM
 // let a: Element | HTMLElement | HTMLParagraphElement;
-const confirmedTotal = $('.confirmed-total') as HTMLSpanElement;
-const deathsTotal = $('.deaths') as HTMLParagraphElement;
-const recoveredTotal = $('.recovered') as HTMLParagraphElement;
-const lastUpdatedTime = $('.last-updated-time') as HTMLParagraphElement;
-const rankList = $('.rank-list');
-const deathsList = $('.deaths-list');
-const recoveredList = $('.recovered-list');
+const confirmedTotal = $<HTMLSpanElement>('.confirmed-total');
+const deathsTotal = $<HTMLParagraphElement>('.deaths');
+const recoveredTotal = $<HTMLParagraphElement>('.recovered');
+const lastUpdatedTime = $<HTMLParagraphElement>('.last-updated-time');
+const rankList = $<HTMLOListElement>('.rank-list');
+const deathsList = $<HTMLOListElement>('.deaths-list');
+const recoveredList = $<HTMLOListElement>('.recovered-list');
 const deathSpinner = createSpinnerElement('deaths-spinner');
 const recoveredSpinner = createSpinnerElement('recovered-spinner');
 
@@ -62,7 +63,7 @@ enum CovidStatus {
 }
 
 function fetchCountryInfo(
-  countryName: string,
+  countryName: string | undefined,
   status: CovidStatus
 ): Promise<AxiosResponse<CountrySummaryResponse>> {
   // params: confirmed, recovered, deaths
@@ -78,16 +79,22 @@ function startApp() {
 
 // events
 function initEvents() {
+  if (!rankList) {
+    // null type check
+    return;
+  }
   rankList.addEventListener('click', handleListClick);
 }
 
-async function handleListClick(event: MouseEvent) {
+async function handleListClick(event: Event) {
   let selectedId;
   if (
     event.target instanceof HTMLParagraphElement ||
     event.target instanceof HTMLSpanElement
   ) {
-    selectedId = event.target.parentElement.id;
+    selectedId = event.target.parentElement
+      ? event.target.parentElement.id
+      : undefined;
   }
   if (event.target instanceof HTMLLIElement) {
     selectedId = event.target.id;
@@ -135,12 +142,19 @@ function setDeathsList(data: CountrySummaryResponse) {
     p.textContent = new Date(value.Date).toLocaleDateString().slice(0, -1);
     li.appendChild(span);
     li.appendChild(p);
-    deathsList.appendChild(li);
+    // ! => non null assertion
+    // ? => optional chaining operator
+    deathsList?.appendChild(li);
+    // if (recoveredList === null || recoveredList === undefined) {
+    //   return;
+    // } else {
+    //   recoveredList.appendChild(li);
+    // }
   });
 }
 
 function clearDeathList() {
-  deathsList.innerHTML = null;
+  deathsList ? (deathsList.innerHTML = '') : undefined;
 }
 
 function setTotalDeathsByCountry(data: CountrySummaryResponse) {
@@ -162,12 +176,13 @@ function setRecoveredList(data: CountrySummaryResponse) {
     p.textContent = new Date(value.Date).toLocaleDateString().slice(0, -1);
     li.appendChild(span);
     li.appendChild(p);
-    recoveredList.appendChild(li);
+    // ? => optional chaining operator
+    recoveredList?.appendChild(li);
   });
 }
 
 function clearRecoveredList() {
-  recoveredList.innerHTML = null;
+  recoveredList ? (recoveredList.innerHTML = '') : undefined;
 }
 
 function setTotalRecoveredByCountry(data: CountrySummaryResponse) {
@@ -175,13 +190,13 @@ function setTotalRecoveredByCountry(data: CountrySummaryResponse) {
 }
 
 function startLoadingAnimation() {
-  deathsList.appendChild(deathSpinner);
-  recoveredList.appendChild(recoveredSpinner);
+  deathsList ? deathsList.appendChild(deathSpinner) : undefined;
+  recoveredList ? recoveredList.appendChild(recoveredSpinner) : undefined;
 }
 
 function endLoadingAnimation() {
-  deathsList.removeChild(deathSpinner);
-  recoveredList.removeChild(recoveredSpinner);
+  deathsList ? deathsList.removeChild(deathSpinner) : undefined;
+  recoveredList ? recoveredList.removeChild(recoveredSpinner) : undefined;
 }
 
 async function setupData() {
@@ -264,7 +279,7 @@ function setCountryRanksByConfirmedCases(data: CovidSummaryResponse) {
     p.textContent = value.Country;
     li.appendChild(span);
     li.appendChild(p);
-    rankList.appendChild(li);
+    rankList ? rankList.appendChild(li) : undefined;
   });
 }
 
